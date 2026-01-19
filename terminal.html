@@ -201,6 +201,7 @@
   education     - Academic background
   projects      - Featured projects
   contact       - Get in touch
+  kavindu       - Display ASCII portrait
   exit          - Return to main portfolio`;
             },
             clear: () => {
@@ -296,6 +297,18 @@ problems into simple, beautiful, and intuitive solutions.`;
 • Email:    kavinduvijegunasekara@gmail.com
 • GitHub:   github.com/Kavinduprabasara
 • LinkedIn: linkedin.com/in/kavindu-wijegunasekara-49729a219`;
+            },
+            kavindu: () => {
+                const img = new Image();
+                img.onload = () => {
+                    const ascii = imageToASCII(img, currentWidth);
+                    addLine(ascii, 'output');
+                };
+                img.onerror = () => {
+                    addLine('Error loading portrait.', 'error');
+                };
+                img.src = 'kavindu.jpg';
+                return 'Loading portrait...';
             },
             exit: () => {
                 window.location.href = 'index.html';
