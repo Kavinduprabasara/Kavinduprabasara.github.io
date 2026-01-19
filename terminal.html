@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            color: #0f0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .terminal-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #2d2d2d;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close {
+            background: #ff5f56;
+        }
+
+        .minimize {
+            background: #ffbd2e;
+        }
+
+        .maximize {
+            background: #27c93f;
+        }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            min-height: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #000;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .prompt {
+            color: #0f0;
+        }
+
+        .command {
+            color: #fff;
+        }
+
+        .output {
+            color: #0f0;
+            white-space: pre;
+            font-size: 10px;
+            line-height: 1.1;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+            margin-left: 8px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .file-input-wrapper {
+            display: none;
+        }
+
+        .error {
+            color: #ff5f56;
+        }
+
+        .success {
+            color: #27c93f;
+        }
+
+        .info {
+            color: #5ac8fa;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-button close"></div>
+            <div class="terminal-button minimize"></div>
+            <div class="terminal-button maximize"></div>
+            <div class="terminal-title">terminal — bash — 80×24</div>
+        </div>
+        <div class="terminal-body" id="terminal">
+            <div class="terminal-line">
+                <span class="info">Welcome to iOS Terminal v1.0</span>
+            </div>
+            <div class="terminal-line">
+                <span class="output">Type 'help' for available commands</span>
+            </div>
+            <div class="terminal-line">
+                <span class="prompt">user@ios:~$</span>
+            </div>
+            <div class="input-line">
+                <span class="prompt">user@ios:~$</span>
+                <input type="text" class="terminal-input" id="commandInput" autofocus>
+                <span class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" class="file-input-wrapper" accept="image/*">
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('commandInput');
+        const fileInput = document.getElementById('fileInput');
+
+        // ASCII characters from darkest to lightest
+        const DOTS = " .·:∴•●";
+        const ASCII_FULL = " .:-=+*#%@";
+
+        let currentMode = 'dots';
+        let currentWidth = 80;
+
+        const commands = {
+            help: () => {
+                return `Available commands:
+  help          - Show this help message
+  clear         - Clear the terminal
+  load          - Load an image file
+  mode [type]   - Set ASCII mode (dots/full)
+  width [num]   - Set output width (default: 80)
+  about         - Who is Kavindu?
+  skills        - Technical skills & stack
+  experience    - Work history
+  education     - Academic background
+  projects      - Featured projects
+  contact       - Get in touch
+  exit          - Return to main portfolio`;
+            },
+            clear: () => {
+                terminal.innerHTML = '';
+                return null;
+            },
+            load: () => {
+                fileInput.click();
+                return 'Select an image file...';
+            },
+            mode: (args) => {
+                if (!args[0]) {
+                    return `Current mode: ${currentMode}\nAvailable modes: dots, full`;
+                }
+                if (args[0] === 'dots' || args[0] === 'full') {
+                    currentMode = args[0];
+                    return `Mode set to: ${currentMode}`;
+                }
+                return `Invalid mode. Use 'dots' or 'full'`;
+            },
+            width: (args) => {
+                if (!args[0]) {
+                    return `Current width: ${currentWidth}`;
+                }
+                const width = parseInt(args[0]);
+                if (width > 10 && width < 200) {
+                    currentWidth = width;
+                    return `Width set to: ${currentWidth}`;
+                }
+                return `Width must be between 10 and 200`;
+            },
+            about: () => {
+                return `Kavindu Wijegunasekara - Software Developer
+---------------------------------------
+I specialize in developing innovative VR/AR applications, dynamic web solutions,
+and intuitive mobile applications, delivering impactful and user-friendly digital
+experiences across platforms.
+
+I'm a passionate full-stack developer with a love for creating beautiful,
+functional, and user-centered digital experiences. I enjoy turning complex
+problems into simple, beautiful, and intuitive solutions.`;
+            },
+            skills: () => {
+                return `Technical Skills:
+-----------------
+• Languages:  C#, Java, Python, TypeScript, JavaScript, Kotlin, Dart, C
+• Frameworks: Next.js, NestJS, React, Flutter, Express, Unity
+• Database:   Prisma, MongoDB, MySQL, Firebase
+• Tools:      Git, Docker, Figma, Postman, Linux, Blender`;
+            },
+            experience: () => {
+                return `Work Experience:
+----------------
+1. Associate Software Engineer (Part-time) @ 4Axis
+   Oct 2025 - Present
+   - iOS Swift application development
+   - Implementation and maintenance of DrawKids iOS app
+
+2. Software Engineer Intern @ 4Axis
+   Feb 2025 - Sep 2025
+   - VR application development using Unity & C#
+   - Immersive experience development`;
+            },
+            education: () => {
+                return `Education:
+----------
+1. University of Moratuwa (2022 - 2026)
+   - B.Sc. (Hons) in Information Technology
+   - CGPA: 3.6
+
+2. Rahula College (2017 - 2020)
+   - Physical Science Stream
+   - Results: Combined Maths (A), Chemistry (A), Physics (B)`;
+            },
+            projects: () => {
+                return `Featured Projects:
+------------------
+1. Anothershot
+   - Platform for discovering & booking photographers
+   - Stack: Next.js, Nest.js, TypeScript, MongoDB, Stripe
+
+2. Devlabs Official Website
+   - Community Portfolio Platform
+   - Stack: Next.js, Strapi, TypeScript
+
+3. Internify
+   - Internship Tracking System
+   - Stack: React.js, Express.js, TypeScript`;
+            },
+            contact: () => {
+                return `Contact Information:
+--------------------
+• Email:    kavinduvijegunasekara@gmail.com
+• GitHub:   github.com/Kavinduprabasara
+• LinkedIn: linkedin.com/in/kavindu-wijegunasekara-49729a219`;
+            },
+            exit: () => {
+                window.location.href = 'index.html';
+                return 'Redirecting...';
+            }
+        };
+
+        function imageToASCII(image, width) {
+            const chars = currentMode === 'dots' ? DOTS : ASCII_FULL;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const aspectRatio = image.height / image.width;
+            const height = Math.floor(width * aspectRatio * 0.55);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(image, 0, 0, width, height);
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const pixels = imageData.data;
+
+            let ascii = '';
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+
+                // Convert to grayscale
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+                // Map to character
+                const charIndex = Math.floor((gray / 255) * (chars.length - 1));
+                ascii += chars[charIndex];
+
+                // Add newline at end of row
+                if ((i / 4 + 1) % width === 0) {
+                    ascii += '\n';
+                }
+            }
+
+            return ascii;
+        }
+
+        function addLine(content, className = '') {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${className}`;
+            line.textContent = content;
+            terminal.insertBefore(line, terminal.lastElementChild);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function processCommand(input) {
+            const [cmd, ...args] = input.trim().toLowerCase().split(' ');
+
+            if (commands[cmd]) {
+                const output = commands[cmd](args);
+                if (output) {
+                    addLine(output, 'output');
+                }
+            } else if (input.trim()) {
+                addLine(`Command not found: ${cmd}`, 'error');
+                addLine('Type "help" for available commands', 'info');
+            }
+        }
+
+        commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = commandInput.value;
+
+                // Show the command
+                addLine(`user@ios:~$ ${command}`, 'command');
+
+                // Process command
+                processCommand(command);
+
+                // Clear input
+                commandInput.value = '';
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            addLine(`Loading: ${file.name}...`, 'info');
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    addLine(`Processing image (${img.width}x${img.height})...`, 'info');
+                    const ascii = imageToASCII(img, currentWidth);
+                    addLine(ascii, 'output');
+                    addLine('Image loaded successfully!', 'success');
+                };
+                img.onerror = () => {
+                    addLine('Error loading image', 'error');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Reset file input
+            fileInput.value = '';
+        });
+
+        // Keep focus on input
+        document.addEventListener('click', () => {
+            commandInput.focus();
+        });
+
+        // Make close button functional
+        document.querySelector('.close').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        commandInput.focus();
+    </script>
+</body>
+
+</html>

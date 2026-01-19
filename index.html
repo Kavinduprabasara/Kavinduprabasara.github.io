@@ -164,6 +164,21 @@
             margin-top: 12px;
         }
 
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-green);
+            padding: 4px 8px;
+            font-family: inherit;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(0, 255, 65, 0.1);
+        }
+
         .nav-link {
             color: var(--terminal-amber);
             text-decoration: none;
@@ -544,8 +559,27 @@
             }
 
             .nav-links {
+                display: none;
                 flex-direction: column;
                 gap: 12px;
+                width: 100%;
+                margin-top: 20px;
+                border-top: 1px dashed var(--terminal-gray);
+                padding-top: 10px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .command-line {
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
             }
 
             .skills-grid {
@@ -601,8 +635,11 @@
                 <!-- Navigation -->
                 <nav class="nav-section">
                     <div class="command-line">
-                        <span class="prompt">kavindu@portfolio:~$</span>
-                        <span class="command">ls navigation/</span>
+                        <div style="display: flex; gap: 12px;">
+                            <span class="prompt">kavindu@portfolio:~$</span>
+                            <span class="command">ls navigation/</span>
+                        </div>
+                        <button class="menu-toggle">[ MENU ]</button>
                     </div>
                     <div class="nav-links">
                         <a href="#home" class="nav-link">home/</a>
@@ -612,6 +649,7 @@
                         <a href="#education" class="nav-link">education/</a>
                         <a href="#projects" class="nav-link">projects/</a>
                         <a href="#contact" class="nav-link">contact/</a>
+                        <a href="terminal.html" class="nav-link">terminal/</a>
                     </div>
                 </nav>
 
@@ -911,6 +949,32 @@
                 link.classList.remove('glow');
                 if (link.getAttribute('href').slice(1) === current) {
                     link.classList.add('glow');
+                }
+            });
+        });
+
+
+        // Mobile Menu Toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinksContainer = document.querySelector('.nav-links');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                navLinksContainer.classList.toggle('active');
+                if (navLinksContainer.classList.contains('active')) {
+                    menuToggle.textContent = '[ CLOSE ]';
+                } else {
+                    menuToggle.textContent = '[ MENU ]';
+                }
+            });
+        }
+
+        // Close menu when a link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    navLinksContainer.classList.remove('active');
+                    menuToggle.textContent = '[ MENU ]';
                 }
             });
         });
