@@ -838,72 +838,8 @@
                         <span class="prompt">kavindu@portfolio:~$</span>
                         <span class="command">cat projects/*</span>
                     </div>
-                    <div class="output">
-                        <div class="project">
-                            <h3>Drawing Desk VR</h3>
-                            <div class="subtitle">Feb 2025 - Sept 2025</div>
-                            <p>
-                                Converted the Drawing Desk VR application for PICO VR, implemented new features, and fixed bugs to
-                                improve stability and overall user experience.
-                            </p>
-                            <p class="tech">Technologies: C#, Unity</p>
-                              <a href="https://store-global.picoxr.com/global/detail/1/7475251220597293062" class="project-link" target="_blank">Visit Live
-                                App</a>
-                        </div>
-
-                        <div class="project">
-                            <h3>Microservices E-Commerce Platform</h3>
-                            <div class="subtitle">Aug 2024 - Dec 2024</div>
-                            <p>
-                                Led development of a microservices-based e-commerce platform with customer-facing frontend, admin
-                                dashboard, and Spring Boot backend services. Implemented order processing system with real-time inven-
-                                tory tracking and built admin dashboard with analytics, product management, and customer management
-                                features.
-                            </p>
-                            <p class="tech">Technologies: Next.js, TypeScript, React, Spring Boot, Java, MySQL, MongoDB, Kafka, Keycloak,
-                                Docker, Spring Cloud Gateway</p>
-                        </div>
-
-                        <div class="project">
-                            <h3>Anothershot</h3>
-                            <div class="subtitle">Second Year Software Project</div>
-                            <p>
-                                AnotherShot is a platform for discovering, booking, and paying photographers online,
-                                featuring interactive portfolios and community engagement. I contributed by integrating
-                                a payment gateway, setting up Cloudinary for image management, and converting the app
-                                into a PWA to boost accessibility and user engagement.
-                            </p>
-                            <p class="tech">Technologies: Next.js, Nest.js, TypeScript, MongoDB, Cloudinary, Stripe,
-                                PrismaORM</p>
-                            <a href="https://anothershots.com" class="project-link" target="_blank">Visit Live Site</a>
-                        </div>
-
-                        <div class="project">
-                            <h3>Devlabs Official Website</h3>
-                            <div class="subtitle">Community Portfolio Platform</div>
-                            <p>
-                                The Devlabs Portfolio Website was built as a user-friendly platform to showcase Devlabs'
-                                projects, achievements, and team members, serving as a central hub for visitors to
-                                explore
-                                and engage with the community.
-                            </p>
-                            <p class="tech">Technologies: Next.js, Strapi, TypeScript</p>
-                            <a href="https://devlabsbyfit.netlify.app" class="project-link" target="_blank">Visit Live
-                                Site</a>
-                        </div>
-
-                        <div class="project">
-                            <h3>Internify</h3>
-                            <div class="subtitle">Internship Tracking System</div>
-                            <p>
-                                Internify is an Internship Tracking System with features such as CV uploading,
-                                internship
-                                round creation, and application management, aimed at streamlining the internship process
-                                for students and coordinators.
-                            </p>
-                            <p class="tech">Technologies: React.js, Express.js, TypeScript</p>
-                            <a href="https://internify.fit" class="project-link" target="_blank">Visit Live Site</a>
-                        </div>
+                    <div class="output" id="projects-container">
+                        <!-- Projects will be loaded here via JavaScript -->
                     </div>
                 </section>
 
@@ -949,6 +885,7 @@
         </div>
     </div>
 
+    <script src="projects.js"></script>
     <script>
         // Tab Navigation Logic
         const navLinks = document.querySelectorAll('.nav-link');
@@ -1020,7 +957,6 @@
             switchTab(hash);
         });
 
-        // Mobile Menu Toggle
         if (menuToggle) {
             menuToggle.addEventListener('click', () => {
                 navLinksContainer.classList.toggle('active');
@@ -1031,6 +967,36 @@
                 }
             });
         }
+
+
+        // Render Projects from projects.js
+        function loadProjects() {
+            try {
+                const container = document.getElementById('projects-container');
+                const projects = typeof projectsData !== 'undefined' ? projectsData : [];
+
+                if (projects && projects.length > 0) {
+                    container.innerHTML = projects.map(project => `
+                        <div class="project">
+                            <h3>${project.title}</h3>
+                            <div class="subtitle">${project.subtitle}</div>
+                            <p>${project.description}</p>
+                            <p class="tech">Technologies: ${project.technologies}</p>
+                            ${project.link ? `<a href="${project.link}" class="project-link" target="_blank">${project.linkText || 'Visit Live Site'}</a>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="comment"># No projects found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                const container = document.getElementById('projects-container');
+                container.innerHTML = '<p class="comment"># Error loading projects.</p>';
+            }
+        }
+
+        // Load projects when the page loads
+        document.addEventListener('DOMContentLoaded', loadProjects);
     </script>
 </body>
 
