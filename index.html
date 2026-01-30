@@ -633,6 +633,154 @@
         .glow {
             text-shadow: 0 0 10px var(--glow-green);
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: var(--terminal-bg);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.2);
+            border: 1px solid var(--terminal-gray);
+        }
+
+        .modal-header {
+            background: var(--window-chrome);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-title-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--terminal-gray);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--terminal-gray);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #FF5F56;
+        }
+
+        .modal-project-title {
+            color: var(--terminal-green);
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--glow-green);
+        }
+
+        .modal-project-subtitle {
+            color: var(--terminal-amber);
+            font-size: 16px;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--terminal-lighter);
+            transition: transform 0.3s, border-color 0.3s;
+            background: #000;
+        }
+
+        .gallery-image:hover {
+            transform: scale(1.02);
+            border-color: var(--terminal-green);
+        }
+
+        .modal-details p {
+            margin-bottom: 15px;
+            color: var(--terminal-white);
+    
+        }
+
+        .modal-tech {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--terminal-gray);
+        }
+
+        .modal-tech h4 {
+            color: var(--terminal-cyan);
+            margin-bottom: 10px;
+        }
+
+        .tech-pill {
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.1);
+            color: var(--terminal-green);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .modal-links {
+            margin-top: 25px;
+        }
+        
+        .project {
+            cursor: pointer;
+        }
+        
+        .project:active {
+            transform: scale(0.99);
+        }
     </style>
 </head>
 
@@ -885,6 +1033,24 @@
         </div>
     </div>
 
+    <!-- Project Details Modal -->
+    <div id="projectModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-bar">
+                    <div class="window-buttons">
+                        <div class="window-button close"></div>
+                    </div>
+                    <span>project_details.exe</span>
+                </div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
     <script src="projects.js"></script>
     <script>
         // Tab Navigation Logic
@@ -976,13 +1142,13 @@
                 const projects = typeof projectsData !== 'undefined' ? projectsData : [];
 
                 if (projects && projects.length > 0) {
-                    container.innerHTML = projects.map(project => `
-                        <div class="project">
+                    container.innerHTML = projects.map((project, index) => `
+                        <div class="project" onclick="openProjectModal(${index})">
                             <h3>${project.title}</h3>
                             <div class="subtitle">${project.subtitle}</div>
                             <p>${project.description}</p>
                             <p class="tech">Technologies: ${project.technologies}</p>
-                            ${project.link ? `<a href="${project.link}" class="project-link" target="_blank">${project.linkText || 'Visit Live Site'}</a>` : ''}
+                            ${project.link ? `<a href="${project.link}" class="project-link" target="_blank" onclick="event.stopPropagation()">${project.linkText || 'Visit Live Site'}</a>` : ''}
                         </div>
                     `).join('');
                 } else {
@@ -994,6 +1160,75 @@
                 container.innerHTML = '<p class="comment"># Error loading projects.</p>';
             }
         }
+
+        // Modal Functions
+        function openProjectModal(index) {
+            const project = projectsData[index];
+            if (!project) return;
+
+            const modal = document.getElementById('projectModal');
+            const modalBody = modal.querySelector('.modal-body');
+            
+            // Generate Tech Pills
+            const techPills = project.technologies.split(',').map(tech => 
+                `<span class="tech-pill">${tech.trim()}</span>`
+            ).join('');
+
+            // Generate Images
+            const imagesHtml = project.images ? 
+                `<div class="image-gallery">
+                    ${project.images.map(img => `<img src="${img}" alt="${project.title} screenshot" class="gallery-image">`).join('')}
+                </div>` : '';
+
+            modalBody.innerHTML = `
+                <h2 class="modal-project-title">${project.title}</h2>
+                <div class="modal-project-subtitle">${project.subtitle}</div>
+                
+                ${imagesHtml}
+                
+                <div class="modal-details">
+                    <p>${project.details || project.description}</p>
+                </div>
+                
+                <div class="modal-tech">
+                    <h4>Stack Used:</h4>
+                    ${techPills}
+                </div>
+
+                ${project.link ? `
+                <div class="modal-links">
+                    <a href="${project.link}" class="project-link" target="_blank">${project.linkText || 'Visit Live Site'}</a>
+                </div>` : ''}
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling background
+        }
+
+        // Close Modal Logic
+        const modal = document.getElementById('projectModal');
+        const closeModalBtn = modal.querySelector('.close-modal');
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        // Close on click outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
 
         // Load projects when the page loads
         document.addEventListener('DOMContentLoaded', loadProjects);
