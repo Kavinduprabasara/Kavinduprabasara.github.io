@@ -27,8 +27,35 @@
   --text: #e2e8f0;
   --text-muted: #64748b;
   --text-dim: #475569;
+  --nav-bg: rgba(6, 9, 15, 0.8);
+  --nav-bg-solid: rgba(6, 9, 15, 0.95);
+  --modal-bg: rgba(6, 9, 15, 0.82);
+  --btn-text: var(--bg-deep);
+  --scanline: rgba(0, 0, 0, 0.03);
   --font-mono: 'JetBrains Mono', monospace;
   --font-body: 'Inter', sans-serif;
+}
+
+:root[data-theme="light"] {
+  --bg-deep: #eef2f7;
+  --bg-main: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f8fc;
+  --border: #dbe3ee;
+  --border-glow: #2563eb44;
+  --green: #15803d;
+  --green-dim: #16a34a;
+  --blue: #2563eb;
+  --purple: #7c3aed;
+  --amber: #b45309;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  --nav-bg: rgba(255, 255, 255, 0.82);
+  --nav-bg-solid: rgba(255, 255, 255, 0.96);
+  --modal-bg: rgba(15, 23, 42, 0.45);
+  --btn-text: #ffffff;
+  --scanline: rgba(0, 0, 0, 0.015);
 }
 
 html { scroll-behavior: smooth; }
@@ -39,6 +66,7 @@ body {
   font-family: var(--font-body);
   line-height: 1.7;
   overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Scanline overlay */
@@ -50,8 +78,8 @@ body::after {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
+    var(--scanline) 2px,
+    var(--scanline) 4px
   );
   pointer-events: none;
   z-index: 9999;
@@ -77,10 +105,10 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(6, 9, 15, 0.8);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid transparent;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, background 0.3s ease;
 }
 nav.scrolled { border-bottom-color: var(--border); }
 
@@ -115,6 +143,25 @@ nav.scrolled { border-bottom-color: var(--border); }
 .nav-links a:hover { color: var(--green); background: rgba(74, 222, 128, 0.06); }
 
 .nav-toggle { display: none; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; padding: 0.5rem; }
+
+.nav-right { display: flex; align-items: center; gap: 0.5rem; }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { color: var(--green); border-color: var(--green); background: rgba(74, 222, 128, 0.06); }
 
 /* ==================== HERO ==================== */
 .hero {
@@ -216,7 +263,7 @@ nav.scrolled { border-bottom-color: var(--border); }
 }
 .btn-primary {
   background: var(--green);
-  color: var(--bg-deep);
+  color: var(--btn-text);
   font-weight: 600;
   box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
 }
@@ -599,7 +646,7 @@ section {
   align-items: center;
   justify-content: center;
   padding: 2rem 1.25rem;
-  background: rgba(6, 9, 15, 0.82);
+  background: var(--modal-bg);
   backdrop-filter: blur(8px);
   opacity: 0;
   pointer-events: none;
@@ -701,7 +748,7 @@ section {
   padding: 0.6rem 1.4rem;
   border-radius: 8px;
   background: var(--green);
-  color: var(--bg-deep);
+  color: var(--btn-text);
   font-weight: 600;
   box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
   transition: all 0.25s;
@@ -827,7 +874,7 @@ footer {
     top: 56px;
     left: 0;
     right: 0;
-    background: rgba(6, 9, 15, 0.95);
+    background: var(--nav-bg-solid);
     backdrop-filter: blur(20px);
     flex-direction: column;
     padding: 1rem;
@@ -853,20 +900,33 @@ footer {
   .about-grid { grid-template-columns: 1fr; }
 }
 </style>
+<script>
+  // Apply saved/system theme before paint to avoid a flash
+  (function () {
+    try {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav id="navbar">
   <div class="nav-logo">~/kavindu<span class="cursor"></span></div>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
-  <div class="nav-links" id="navLinks">
-    <a href="#about">about</a>
-    <a href="#skills">skills</a>
-    <a href="#experience">experience</a>
-    <a href="#education">education</a>
-    <a href="#projects">projects</a>
-    <a href="#contact">contact</a>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#about">about</a>
+      <a href="#skills">skills</a>
+      <a href="#experience">experience</a>
+      <a href="#education">education</a>
+      <a href="#projects">projects</a>
+      <a href="#contact">contact</a>
+    </div>
   </div>
 </nav>
 
@@ -1130,6 +1190,25 @@ footer {
 const nav = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+function syncThemeIcon() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+}
+syncThemeIcon();
+themeToggle.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  if (isLight) {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+  try { localStorage.setItem('theme', isLight ? 'dark' : 'light'); } catch (e) {}
+  syncThemeIcon();
 });
 
 // Mobile nav toggle
