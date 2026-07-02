@@ -58,7 +58,7 @@
   --scanline: rgba(0, 0, 0, 0.015);
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   background: var(--bg-deep);
@@ -107,7 +107,6 @@ body::after {
 }
 #loader.done { opacity: 0; visibility: hidden; }
 body.loading { overflow: hidden; }
-body.loading .hero-content > * { animation-play-state: paused; }
 
 .loader-window {
   width: 100%;
@@ -234,6 +233,7 @@ nav.scrolled { border-bottom-color: var(--border); }
   justify-content: center;
   padding: 6rem 2rem 4rem;
   position: relative;
+  overflow: hidden;
 }
 
 .hero-grid-bg {
@@ -260,6 +260,7 @@ nav.scrolled { border-bottom-color: var(--border); }
 
 .hero-content {
   max-width: 720px;
+  width: 100%;
   text-align: center;
   position: relative;
   z-index: 1;
@@ -281,11 +282,12 @@ nav.scrolled { border-bottom-color: var(--border); }
 
 .hero-name {
   font-family: var(--font-mono);
-  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  font-size: clamp(2rem, 6vw, 4.2rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.04em;
   margin-bottom: 0.75rem;
+  overflow-wrap: anywhere;
   background: linear-gradient(135deg, var(--text), var(--blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -337,6 +339,18 @@ nav.scrolled { border-bottom-color: var(--border); }
   background: transparent;
 }
 .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+
+/* Typewriter role cursor */
+.hero-title .type-role { color: var(--green); }
+.type-cursor {
+  display: inline-block;
+  width: 9px;
+  height: 1.05em;
+  background: var(--green);
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
 
 .scroll-indicator {
   position: absolute;
@@ -391,38 +405,78 @@ section {
 .about-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-.about-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  max-width: 720px;
 }
 .about-text {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text-muted);
-  line-height: 1.8;
+  line-height: 1.9;
 }
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s;
-}
-.stat-card:hover { border-color: var(--border-glow); background: var(--bg-card-hover); transform: translateY(-2px); }
-.stat-value {
+.about-text strong { color: var(--text); font-weight: 600; }
+.about-text .hl { color: var(--green); font-weight: 500; }
+
+.about-do { margin-top: 0.75rem; }
+.about-do-title {
   font-family: var(--font-mono);
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+.about-do-title .prompt { color: var(--green); }
+.about-do-list { list-style: none; display: grid; gap: 0.7rem; }
+.about-do-list li {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding-left: 1.3rem;
+  position: relative;
+}
+.about-do-list li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
   color: var(--green);
-  margin-bottom: 0.25rem;
 }
-.stat-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  letter-spacing: 0.02em;
+.about-do-list li strong { color: var(--text); font-weight: 600; }
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2.5rem;
+  align-items: center;
+}
+.about-marquee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+.marquee-row { overflow: hidden; }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 36s linear infinite;
+}
+.marquee-row:nth-child(2) .marquee-track { animation-duration: 28s; animation-direction: reverse; }
+.marquee-row:nth-child(3) .marquee-track { animation-duration: 44s; }
+.about-marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-track img {
+  height: 96px;
+  width: auto;
+  flex: none;
+  margin-right: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  display: block;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 /* ==================== SKILLS ==================== */
@@ -1038,7 +1092,9 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .about-stats { grid-template-columns: 1fr; }
+  .about-do-list { font-size: 0.8rem; }
+  .about-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .marquee-track img { height: 80px; }
 }
 </style>
 <script>
@@ -1100,7 +1156,7 @@ footer {
   <div class="hero-content">
     <div class="hero-terminal"><span class="prompt">$</span> whoami</div>
     <h1 class="hero-name">Kavindu Wijegunasekara</h1>
-    <p class="hero-title">Software Engineer</p>
+    <p class="hero-title"><span id="typeRole" class="type-role">Software Engineer</span><span class="type-cursor" aria-hidden="true"></span></p>
     <p class="hero-desc">
       Problem-solver and BSc (Hons) IT candidate at University of Moratuwa. From microservices with Spring Boot to immersive VR in Unity — I thrive on tackling challenges across the full technology spectrum.
     </p>
@@ -1121,26 +1177,60 @@ footer {
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> about.txt</div>
     <h2 class="section-title">About Me</h2>
   </div>
-  <div class="about-content stagger">
+  <div class="about-layout">
+    <div class="about-content reveal">
     <p class="about-text">
-      Hello! I'm Kavindu — a passionate full-stack developer with a love for creating beautiful, functional, and user-centered digital experiences. I enjoy turning complex problems into simple, intuitive solutions. When I'm not coding, you'll find me exploring new technologies, contributing to open source, or diving into game development.
+      I'm <strong>Kavindu Wijegunasekara</strong>, a software engineer from <strong>Sri Lanka</strong>, currently completing my <strong>BSc (Hons) in Information Technology</strong> at the <strong>University of Moratuwa</strong>. I love turning complex problems into clean, reliable, and user-focused software.
     </p>
-    <div class="about-stats">
-      <div class="stat-card">
-        <div class="stat-value">3.6</div>
-        <div class="stat-label">CGPA</div>
+    <p class="about-text">
+      My work spans the full technology spectrum — I build web applications with React and Next.js, design backends and microservices with Spring Boot and NestJS, ship native iOS apps in Swift, and craft immersive <span class="hl">VR/XR</span> experiences in Unity. I'm just as happy architecting an API as I am polishing an interface or debugging a VR interaction.
+    </p>
+    <div class="about-do">
+      <div class="about-do-title"><span class="prompt">$</span> what I can do</div>
+      <ul class="about-do-list">
+        <li><strong>Full-stack web</strong> — React, Next.js, NestJS, Spring Boot</li>
+        <li><strong>Mobile apps</strong> — iOS with Swift &amp; SwiftUI, Flutter</li>
+        <li><strong>VR / XR</strong> — Unity, C#, OpenXR &amp; PICO / Oculus SDKs</li>
+        <li><strong>Backend &amp; cloud</strong> — REST APIs, databases, Docker, Firebase</li>
+      </ul>
+    </div>
+    </div>
+    <div class="about-marquee reveal" aria-hidden="true">
+      <div class="marquee-row">
+        <div class="marquee-track">
+          <img src="fitfuturecareers2025.png" alt="" loading="lazy">
+          <img src="microservices.avif" alt="" loading="lazy">
+          <img src="spreadit.avif" alt="" loading="lazy">
+          <img src="drawing desk.jpeg" alt="" loading="lazy">
+          <img src="fitfuturecareers2025.png" alt="" loading="lazy">
+          <img src="microservices.avif" alt="" loading="lazy">
+          <img src="spreadit.avif" alt="" loading="lazy">
+          <img src="drawing desk.jpeg" alt="" loading="lazy">
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">12+</div>
-        <div class="stat-label">months experience</div>
+      <div class="marquee-row">
+        <div class="marquee-track">
+          <img src="fitfuturecareers2026.png" alt="" loading="lazy">
+          <img src="secondyearproject.jpeg" alt="" loading="lazy">
+          <img src="devlabs.avif" alt="" loading="lazy">
+          <img src="BBJ1.png" alt="" loading="lazy">
+          <img src="fitfuturecareers2026.png" alt="" loading="lazy">
+          <img src="secondyearproject.jpeg" alt="" loading="lazy">
+          <img src="devlabs.avif" alt="" loading="lazy">
+          <img src="BBJ1.png" alt="" loading="lazy">
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">30+</div>
-        <div class="stat-label">technologies</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">VR/XR</div>
-        <div class="stat-label">specialization</div>
+      <div class="marquee-row">
+        <div class="marquee-track">
+          <img src="DrawKids.png" alt="" loading="lazy">
+          <img src="firstyearproject.jpeg" alt="" loading="lazy">
+          <img src="BBJ2.png" alt="" loading="lazy">
+          <img src="kavindu.jpg" alt="" loading="lazy">
+          <img src="DrawKids.png" alt="" loading="lazy">
+          <img src="firstyearproject.jpeg" alt="" loading="lazy">
+          <img src="BBJ2.png" alt="" loading="lazy">
+          <img src="kavindu.jpg" alt="" loading="lazy">
+        </div>
       </div>
     </div>
   </div>
@@ -1157,6 +1247,7 @@ footer {
     <button class="skill-chip" data-cat="frameworks"><span>🔧</span> Frameworks</button>
     <button class="skill-chip" data-cat="xr"><span>🎮</span> Game Dev &amp; XR</button>
     <button class="skill-chip" data-cat="tools"><span>☁️</span> Tools</button>
+    <button class="skill-chip" data-cat="ai"><span>🤖</span> AI Tools</button>
   </div>
   <div class="skills-categories">
     <div class="skill-category active" data-cat="languages">
@@ -1204,6 +1295,8 @@ footer {
         <span class="skill-pill purple">Unity</span>
         <span class="skill-pill purple">Blender</span>
         <span class="skill-pill purple">PICO XR SDK</span>
+        <span class="skill-pill purple">OpenXR</span>
+        <span class="skill-pill purple">Oculus SDK</span>
       </div>
     </div>
     <div class="skill-category" data-cat="tools">
@@ -1222,6 +1315,20 @@ footer {
         <span class="skill-pill amber">Node.js</span>
         <span class="skill-pill amber">Postman</span>
         <span class="skill-pill amber">Figma</span>
+        <span class="skill-pill amber">Xcode</span>
+        <span class="skill-pill amber">Android Studio</span>
+        <span class="skill-pill amber">IntelliJ IDEA</span>
+      </div>
+    </div>
+    <div class="skill-category" data-cat="ai">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">🤖</span>
+        <span class="skill-cat-title">AI Tools</span>
+      </div>
+      <div class="skill-pills">
+        <span class="skill-pill">Claude Code</span>
+        <span class="skill-pill">Cursor</span>
+        <span class="skill-pill">Antigravity</span>
       </div>
     </div>
   </div>
@@ -1407,6 +1514,7 @@ footer {
     loader.classList.add('done');
     document.body.classList.remove('loading');
     setTimeout(() => loader.remove(), 700);
+    if (typeof startHero === 'function') startHero();
   }
 
   if (reduce) {
@@ -1620,6 +1728,33 @@ modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
 });
+
+// ==================== HERO TYPEWRITER ====================
+let heroStarted = false;
+function startHero() {
+  const el = document.getElementById('typeRole');
+  if (!el || heroStarted) return;
+  heroStarted = true;
+  const roles = ['Software Engineer', 'VR/XR Developer', 'iOS Developer', 'Full-Stack Developer'];
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = roles[0];
+    return;
+  }
+  el.textContent = '';
+  let ri = 0, ci = 0, deleting = false;
+  (function tick() {
+    const word = roles[ri];
+    if (!deleting) {
+      el.textContent = word.slice(0, ++ci);
+      if (ci === word.length) { deleting = true; return setTimeout(tick, 1600); }
+      setTimeout(tick, 70);
+    } else {
+      el.textContent = word.slice(0, --ci);
+      if (ci === 0) { deleting = false; ri = (ri + 1) % roles.length; return setTimeout(tick, 350); }
+      setTimeout(tick, 40);
+    }
+  })();
+}
 
 document.addEventListener('DOMContentLoaded', loadProjects);
 </script>
