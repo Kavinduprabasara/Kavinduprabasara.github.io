@@ -93,6 +93,69 @@ body::after {
 ::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+/* ==================== LOADER ==================== */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#loader.done { opacity: 0; visibility: hidden; }
+body.loading { overflow: hidden; }
+body.loading .hero-content > * { animation-play-state: paused; }
+
+.loader-window {
+  width: 100%;
+  max-width: 460px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.95;
+}
+.loader-prompt { color: var(--green); margin-bottom: 0.6rem; }
+.loader-prompt .cmd { color: var(--blue); }
+.loader-line {
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.loader-line.show { opacity: 1; transform: none; }
+.loader-line .ok { color: var(--green); }
+.loader-line .fail { color: var(--amber); }
+
+.loader-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  color: var(--text-dim);
+}
+.loader-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.loader-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--green);
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+}
+.loader-pct { color: var(--green); min-width: 3.5ch; text-align: right; }
+
+@media (prefers-reduced-motion: reduce) {
+  #loader { transition: none; }
+  .loader-line { transition: none; }
+}
+
 /* ==================== NAV ==================== */
 nav {
   position: fixed;
@@ -325,7 +388,12 @@ section {
 }
 
 /* ==================== ABOUT ==================== */
-.about-grid {
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.about-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
@@ -334,8 +402,6 @@ section {
   font-size: 0.95rem;
   color: var(--text-muted);
   line-height: 1.8;
-  grid-column: 1 / -1;
-  margin-bottom: 0.5rem;
 }
 .stat-card {
   background: var(--bg-card);
@@ -360,6 +426,34 @@ section {
 }
 
 /* ==================== SKILLS ==================== */
+.skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+.skill-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.25s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: -0.01em;
+}
+.skill-chip:hover { border-color: var(--border-glow); color: var(--text); transform: translateY(-1px); }
+.skill-chip.active {
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: var(--green);
+}
+
 .skills-categories { display: flex; flex-direction: column; gap: 2rem; }
 
 .skill-category {
@@ -368,7 +462,9 @@ section {
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s;
+  display: none;
 }
+.skill-category.active { display: block; animation: fadeInUp 0.4s ease; }
 .skill-category:hover { border-color: var(--border-glow); }
 
 .skill-cat-header {
@@ -755,6 +851,52 @@ section {
 }
 .modal-links a:hover { box-shadow: 0 0 30px rgba(74, 222, 128, 0.3); transform: translateY(-1px); }
 
+/* ==================== RESEARCH ==================== */
+.research-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.research-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  transition: all 0.3s;
+}
+.research-card:hover { border-color: var(--border-glow); background: var(--bg-card-hover); transform: translateY(-2px); }
+.research-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background: rgba(167, 139, 250, 0.1);
+  color: var(--purple);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+.research-title {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+.research-context {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--blue);
+  margin-bottom: 1rem;
+}
+.research-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+.research-tech { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
 /* ==================== CONTACT ==================== */
 .contact-content {
   text-align: center;
@@ -886,7 +1028,6 @@ footer {
 
   section { padding: 4rem 1.25rem; }
   .hero { padding: 5rem 1.25rem 3rem; }
-  .about-grid { grid-template-columns: 1fr 1fr; }
   .timeline-item { grid-template-columns: 1fr; gap: 0.5rem; }
   .timeline-date { text-align: left; }
   .timeline-card::before, .timeline-card::after { display: none; }
@@ -897,7 +1038,7 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .about-grid { grid-template-columns: 1fr; }
+  .about-stats { grid-template-columns: 1fr; }
 }
 </style>
 <script>
@@ -911,7 +1052,27 @@ footer {
   })();
 </script>
 </head>
-<body>
+<body class="loading">
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-window">
+    <div class="loader-prompt">kavindu@portfolio:~$ <span class="cmd">./boot.sh</span></div>
+    <div class="loader-lines">
+      <div class="loader-line"><span class="ok">[ OK ]</span> mounting /about</div>
+      <div class="loader-line"><span class="ok">[ OK ]</span> loading /skills</div>
+      <div class="loader-line"><span class="ok">[ OK ]</span> fetching /experience</div>
+      <div class="loader-line"><span class="ok">[ OK ]</span> compiling /projects</div>
+      <div class="loader-line"><span class="ok">[ OK ]</span> indexing /research</div>
+      <div class="loader-line"><span class="ok">[ OK ]</span> initializing UI</div>
+    </div>
+    <div class="loader-bar">
+      <span>loading</span>
+      <div class="loader-track"><div class="loader-fill"></div></div>
+      <span class="loader-pct">0%</span>
+    </div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav id="navbar">
@@ -925,6 +1086,8 @@ footer {
       <a href="#experience">experience</a>
       <a href="#education">education</a>
       <a href="#projects">projects</a>
+      <a href="#research">research</a>
+      <a href="articles.html">articles</a>
       <a href="#contact">contact</a>
     </div>
   </div>
@@ -958,25 +1121,27 @@ footer {
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> about.txt</div>
     <h2 class="section-title">About Me</h2>
   </div>
-  <div class="about-grid stagger">
+  <div class="about-content stagger">
     <p class="about-text">
       Hello! I'm Kavindu — a passionate full-stack developer with a love for creating beautiful, functional, and user-centered digital experiences. I enjoy turning complex problems into simple, intuitive solutions. When I'm not coding, you'll find me exploring new technologies, contributing to open source, or diving into game development.
     </p>
-    <div class="stat-card">
-      <div class="stat-value">3.6</div>
-      <div class="stat-label">CGPA</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">12+</div>
-      <div class="stat-label">months experience</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">30+</div>
-      <div class="stat-label">technologies</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">VR/XR</div>
-      <div class="stat-label">specialization</div>
+    <div class="about-stats">
+      <div class="stat-card">
+        <div class="stat-value">3.6</div>
+        <div class="stat-label">CGPA</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">12+</div>
+        <div class="stat-label">months experience</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">30+</div>
+        <div class="stat-label">technologies</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">VR/XR</div>
+        <div class="stat-label">specialization</div>
+      </div>
     </div>
   </div>
 </section>
@@ -987,8 +1152,14 @@ footer {
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">ls</span> -la skills/</div>
     <h2 class="section-title">Skills & Technologies</h2>
   </div>
-  <div class="skills-categories stagger">
-    <div class="skill-category">
+  <div class="skill-chips reveal" id="skillChips">
+    <button class="skill-chip active" data-cat="languages"><span>⚡</span> Languages</button>
+    <button class="skill-chip" data-cat="frameworks"><span>🔧</span> Frameworks</button>
+    <button class="skill-chip" data-cat="xr"><span>🎮</span> Game Dev &amp; XR</button>
+    <button class="skill-chip" data-cat="tools"><span>☁️</span> Tools</button>
+  </div>
+  <div class="skills-categories">
+    <div class="skill-category active" data-cat="languages">
       <div class="skill-cat-header">
         <span class="skill-cat-icon">⚡</span>
         <span class="skill-cat-title">Languages</span>
@@ -1006,7 +1177,7 @@ footer {
         <span class="skill-pill">Bash</span>
       </div>
     </div>
-    <div class="skill-category">
+    <div class="skill-category" data-cat="frameworks">
       <div class="skill-cat-header">
         <span class="skill-cat-icon">🔧</span>
         <span class="skill-cat-title">Frameworks & Libraries</span>
@@ -1024,7 +1195,7 @@ footer {
         <span class="skill-pill blue">SwiftUI</span>
       </div>
     </div>
-    <div class="skill-category">
+    <div class="skill-category" data-cat="xr">
       <div class="skill-cat-header">
         <span class="skill-cat-icon">🎮</span>
         <span class="skill-cat-title">Game Dev & XR</span>
@@ -1035,7 +1206,7 @@ footer {
         <span class="skill-pill purple">PICO XR SDK</span>
       </div>
     </div>
-    <div class="skill-category">
+    <div class="skill-category" data-cat="tools">
       <div class="skill-cat-header">
         <span class="skill-cat-icon">☁️</span>
         <span class="skill-cat-title">Tools & Infrastructure</span>
@@ -1128,8 +1299,42 @@ footer {
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">ls</span> projects/</div>
     <h2 class="section-title">Projects</h2>
   </div>
-  <div class="projects-grid stagger" id="projects-container">
+  <div class="skill-chips reveal" id="projectChips">
+    <button class="skill-chip active" data-cat="4axis"><span>🏢</span> 4Axis</button>
+    <button class="skill-chip" data-cat="academic"><span>🎓</span> Academic</button>
+    <button class="skill-chip" data-cat="volunteering"><span>🤝</span> Volunteering</button>
+    <button class="skill-chip" data-cat="freelance"><span>💼</span> Freelance</button>
+  </div>
+  <div class="projects-grid" id="projects-container">
     <!-- Project cards injected from projects.js -->
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section id="research">
+  <div class="section-header reveal">
+    <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> research/*.md</div>
+    <h2 class="section-title">Research</h2>
+  </div>
+  <div class="research-list stagger">
+    <div class="research-card">
+      <span class="research-badge">Final-Year Capstone · University of Moratuwa</span>
+      <div class="research-title">SHOPLYTICS — Trend-Augmented Demand Forecasting</div>
+      <div class="research-context">Group Research Project · Causal-Inference Module Owner</div>
+      <p class="research-desc">
+        Contributed to a group project investigating whether Google Trends signals can improve apparel demand forecasting, using the VISUELLE 2.0 fashion retail dataset. Owned the causal-inference module: built a pipeline that constructs composite trend signals, screens them for Granger causality (with FDR correction), models impulse responses via ARDL, classifies trends as viral vs. macro, and generates probability-weighted demand scenarios.
+      </p>
+      <div class="research-tech">
+        <span class="tech-pill">Python</span>
+        <span class="tech-pill">statsmodels</span>
+        <span class="tech-pill">Granger Causality</span>
+        <span class="tech-pill">ARDL</span>
+        <span class="tech-pill">pandas / NumPy</span>
+        <span class="tech-pill">Streamlit</span>
+        <span class="tech-pill">Manim</span>
+        <span class="tech-pill">Google Trends API</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1186,6 +1391,51 @@ footer {
 
 <script src="projects.js"></script>
 <script>
+// ==================== BOOT LOADER ====================
+(function bootLoader() {
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+  const lines = loader.querySelectorAll('.loader-line');
+  const fill = loader.querySelector('.loader-fill');
+  const pct = loader.querySelector('.loader-pct');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let finished = false;
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    loader.classList.add('done');
+    document.body.classList.remove('loading');
+    setTimeout(() => loader.remove(), 700);
+  }
+
+  if (reduce) {
+    lines.forEach(l => l.classList.add('show'));
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    setTimeout(finish, 300);
+    return;
+  }
+
+  const step = 240;             // ms between boot lines
+  const startDelay = 350;
+  const total = startDelay + lines.length * step;
+
+  lines.forEach((line, i) => setTimeout(() => line.classList.add('show'), startDelay + i * step));
+
+  const start = performance.now();
+  (function tick(now) {
+    const t = Math.min(1, (now - start) / total);
+    const p = Math.round(t * 100);
+    fill.style.width = p + '%';
+    pct.textContent = p + '%';
+    if (t < 1) requestAnimationFrame(tick);
+    else setTimeout(finish, 450);
+  })(start);
+
+  setTimeout(finish, total + 2500);   // safety fallback
+})();
+
 // Nav scroll effect
 const nav = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
@@ -1216,6 +1466,31 @@ const toggle = document.getElementById('navToggle');
 const links = document.getElementById('navLinks');
 toggle.addEventListener('click', () => links.classList.toggle('open'));
 links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
+
+// Skills chip navigation
+const skillChips = document.querySelectorAll('.skill-chip');
+const skillCategories = document.querySelectorAll('.skill-category');
+skillChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    const cat = chip.dataset.cat;
+    skillChips.forEach(c => c.classList.toggle('active', c === chip));
+    skillCategories.forEach(sec => sec.classList.toggle('active', sec.dataset.cat === cat));
+  });
+});
+
+// Projects chip navigation
+const projectChips = document.querySelectorAll('#projectChips .skill-chip');
+function filterProjects(cat) {
+  document.querySelectorAll('#projects-container .project-card').forEach(card => {
+    card.style.display = card.dataset.cat === cat ? '' : 'none';
+  });
+}
+projectChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    projectChips.forEach(c => c.classList.toggle('active', c === chip));
+    filterProjects(chip.dataset.cat);
+  });
+});
 
 // Scroll reveal
 const revealEls = document.querySelectorAll('.reveal, .stagger');
@@ -1268,7 +1543,7 @@ function loadProjects() {
         .map(t => `<span class="project-stack-tag">${escapeHtml(t.trim())}</span>`)
         .join('');
       return `
-        <div class="project-card" onclick="openProjectModal(${index})" role="button" tabindex="0">
+        <div class="project-card" data-cat="${escapeHtml(project.category || '')}" onclick="openProjectModal(${index})" role="button" tabindex="0">
           <div class="project-icon ${color}">${icon}</div>
           <div class="project-name">${escapeHtml(project.title)}</div>
           <p class="project-desc">${escapeHtml(project.description)}</p>
@@ -1285,9 +1560,9 @@ function loadProjects() {
       });
     });
 
-    // Re-run stagger reveal in case the section is already in view
-    const grid = document.getElementById('projects-container');
-    if (grid && grid.getBoundingClientRect().top < window.innerHeight) grid.classList.add('visible');
+    // Apply the default active category filter
+    const activeChip = document.querySelector('#projectChips .skill-chip.active');
+    filterProjects(activeChip ? activeChip.dataset.cat : '4axis');
   } catch (err) {
     console.error('Error loading projects:', err);
     container.innerHTML = '<p class="project-desc"># Error loading projects.</p>';
