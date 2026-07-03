@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -58,14 +60,14 @@
   --scanline: rgba(0, 0, 0, 0.015);
 }
 
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 
 body {
   background: var(--bg-deep);
   color: var(--text);
   font-family: var(--font-body);
   line-height: 1.7;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -221,9 +223,16 @@ nav.scrolled { border-bottom-color: var(--border); }
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1;
-  transition: all 0.2s;
+  transition: all 0.2s, filter 0.3s ease, text-shadow 0.3s ease;
 }
 .theme-toggle:hover { color: var(--green); border-color: var(--green); background: rgba(74, 222, 128, 0.06); }
+/* Bulb OFF — dark mode (default): dim, desaturated */
+.theme-toggle { filter: grayscale(1) brightness(0.75) opacity(0.6); }
+/* Bulb ON — light mode: full colour with a warm glow */
+:root[data-theme="light"] .theme-toggle {
+  filter: none;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.75);
+}
 
 /* ==================== HERO ==================== */
 .hero {
@@ -441,10 +450,12 @@ section {
 }
 .about-do-list li strong { color: var(--text); font-weight: 600; }
 
+/* About is intentionally wider than the other panels, with a larger gallery */
+#about .panel-inner { max-width: 1240px; }
 .about-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 2.5rem;
+  grid-template-columns: minmax(320px, 480px) 1fr;
+  gap: 3.25rem;
   align-items: center;
 }
 .about-marquee {
@@ -465,7 +476,7 @@ section {
 .marquee-row:nth-child(3) .marquee-track { animation-duration: 44s; }
 .about-marquee:hover .marquee-track { animation-play-state: paused; }
 .marquee-track img {
-  height: 96px;
+  height: 148px;
   width: auto;
   flex: none;
   margin-right: 0.75rem;
@@ -540,6 +551,9 @@ section {
 
 .skill-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   padding: 0.4rem 0.85rem;
@@ -550,6 +564,7 @@ section {
   transition: all 0.25s;
   cursor: default;
 }
+.skill-pill i { font-size: 1.05rem; line-height: 1; }
 .skill-pill:hover {
   background: rgba(74, 222, 128, 0.12);
   border-color: rgba(74, 222, 128, 0.25);
@@ -998,6 +1013,70 @@ section {
   text-align: center;
 }
 
+/* ==================== SCROLL STAGE ==================== */
+.scroll-stage { position: relative; }
+.stage-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+.stage-panels { position: relative; height: 100%; }
+.stage-panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease, visibility 0.55s;
+  pointer-events: none;
+}
+.stage-panel::-webkit-scrollbar { width: 6px; }
+.stage-panel.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+}
+.panel-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 6.5rem 2rem 3.5rem;
+}
+.panel-inner .section-header { margin-bottom: 2.25rem; }
+
+/* Per-panel typing reveal (first view only, non-blocking).
+   Content stays hidden until the command finishes typing; .reveal/.stagger
+   items then fade in one after another via their existing delays. */
+.stage-panel .section-title { transition: opacity 0.5s ease, transform 0.5s ease; }
+.stage-panel.awaiting-type .section-title,
+.stage-panel.awaiting-type .panel-inner > *:nth-child(n+2) {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.stage-panel .panel-inner > *:nth-child(n+2) { transition: opacity 0.5s ease, transform 0.5s ease; }
+.type-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  background: var(--green);
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+@media (max-width: 768px) {
+  .panel-inner { padding: 5.5rem 1.25rem 3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-panel { transition: opacity 0.01ms; transform: none; }
+}
+
 /* ==================== FOOTER ==================== */
 footer {
   text-align: center;
@@ -1091,10 +1170,15 @@ footer {
   .projects-grid { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 900px) {
+  #about .panel-inner { max-width: 900px; }
+  .about-layout { grid-template-columns: 1fr; gap: 2.25rem; }
+  .marquee-track img { height: 120px; }
+}
 @media (max-width: 480px) {
   .about-do-list { font-size: 0.8rem; }
-  .about-layout { grid-template-columns: 1fr; gap: 2rem; }
-  .marquee-track img { height: 80px; }
+  .about-layout { gap: 2rem; }
+  .marquee-track img { height: 88px; }
 }
 </style>
 <script>
@@ -1131,10 +1215,10 @@ footer {
 </div>
 
 <!-- NAV -->
-<nav id="navbar">
+<nav id="navbar" aria-label="Primary">
   <div class="nav-logo">~/kavindu<span class="cursor"></span></div>
   <div class="nav-right">
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">💡</button>
     <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
     <div class="nav-links" id="navLinks">
       <a href="#about">about</a>
@@ -1171,8 +1255,14 @@ footer {
   </div>
 </section>
 
+<!-- SCROLL STAGE -->
+<div class="scroll-stage" id="scrollStage">
+  <div class="stage-sticky">
+    <div class="stage-panels">
+
 <!-- ABOUT -->
-<section id="about">
+<div class="stage-panel" id="about">
+  <div class="panel-inner">
   <div class="section-header reveal">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> about.txt</div>
     <h2 class="section-title">About Me</h2>
@@ -1234,10 +1324,12 @@ footer {
       </div>
     </div>
   </div>
-</section>
+  </div>
+</div>
 
 <!-- SKILLS -->
-<section id="skills">
+<div class="stage-panel" id="skills">
+  <div class="panel-inner">
   <div class="section-header reveal">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">ls</span> -la skills/</div>
     <h2 class="section-title">Skills & Technologies</h2>
@@ -1256,16 +1348,16 @@ footer {
         <span class="skill-cat-title">Languages</span>
       </div>
       <div class="skill-pills">
-        <span class="skill-pill">TypeScript</span>
-        <span class="skill-pill">JavaScript</span>
-        <span class="skill-pill">Java</span>
-        <span class="skill-pill">Kotlin</span>
-        <span class="skill-pill">C#</span>
-        <span class="skill-pill">Python</span>
-        <span class="skill-pill">Dart</span>
-        <span class="skill-pill">C</span>
-        <span class="skill-pill">Swift</span>
-        <span class="skill-pill">Bash</span>
+        <span class="skill-pill"><i class="devicon-typescript-plain colored" aria-hidden="true"></i>TypeScript</span>
+        <span class="skill-pill"><i class="devicon-javascript-plain colored" aria-hidden="true"></i>JavaScript</span>
+        <span class="skill-pill"><i class="devicon-java-plain colored" aria-hidden="true"></i>Java</span>
+        <span class="skill-pill"><i class="devicon-kotlin-plain colored" aria-hidden="true"></i>Kotlin</span>
+        <span class="skill-pill"><i class="devicon-csharp-plain colored" aria-hidden="true"></i>C#</span>
+        <span class="skill-pill"><i class="devicon-python-plain colored" aria-hidden="true"></i>Python</span>
+        <span class="skill-pill"><i class="devicon-dart-plain colored" aria-hidden="true"></i>Dart</span>
+        <span class="skill-pill"><i class="devicon-c-plain colored" aria-hidden="true"></i>C</span>
+        <span class="skill-pill"><i class="devicon-swift-plain colored" aria-hidden="true"></i>Swift</span>
+        <span class="skill-pill"><i class="devicon-bash-plain colored" aria-hidden="true"></i>Bash</span>
       </div>
     </div>
     <div class="skill-category" data-cat="frameworks">
@@ -1274,15 +1366,15 @@ footer {
         <span class="skill-cat-title">Frameworks & Libraries</span>
       </div>
       <div class="skill-pills">
-        <span class="skill-pill blue">React</span>
-        <span class="skill-pill blue">Next.js</span>
-        <span class="skill-pill blue">NestJS</span>
-        <span class="skill-pill blue">Express</span>
-        <span class="skill-pill blue">Flutter</span>
-        <span class="skill-pill blue">Tailwind CSS</span>
-        <span class="skill-pill blue">Bootstrap</span>
-        <span class="skill-pill blue">Material UI</span>
-        <span class="skill-pill blue">Prisma</span>
+        <span class="skill-pill blue"><i class="devicon-react-original colored" aria-hidden="true"></i>React</span>
+        <span class="skill-pill blue"><i class="devicon-nextjs-plain" aria-hidden="true"></i>Next.js</span>
+        <span class="skill-pill blue"><i class="devicon-nestjs-original colored" aria-hidden="true"></i>NestJS</span>
+        <span class="skill-pill blue"><i class="devicon-express-original" aria-hidden="true"></i>Express</span>
+        <span class="skill-pill blue"><i class="devicon-flutter-plain colored" aria-hidden="true"></i>Flutter</span>
+        <span class="skill-pill blue"><i class="devicon-tailwindcss-original colored" aria-hidden="true"></i>Tailwind CSS</span>
+        <span class="skill-pill blue"><i class="devicon-bootstrap-plain colored" aria-hidden="true"></i>Bootstrap</span>
+        <span class="skill-pill blue"><i class="devicon-materialui-plain colored" aria-hidden="true"></i>Material UI</span>
+        <span class="skill-pill blue"><i class="devicon-prisma-original" aria-hidden="true"></i>Prisma</span>
         <span class="skill-pill blue">SwiftUI</span>
       </div>
     </div>
@@ -1292,8 +1384,8 @@ footer {
         <span class="skill-cat-title">Game Dev & XR</span>
       </div>
       <div class="skill-pills">
-        <span class="skill-pill purple">Unity</span>
-        <span class="skill-pill purple">Blender</span>
+        <span class="skill-pill purple"><i class="devicon-unity-plain" aria-hidden="true"></i>Unity</span>
+        <span class="skill-pill purple"><i class="devicon-blender-original colored" aria-hidden="true"></i>Blender</span>
         <span class="skill-pill purple">PICO XR SDK</span>
         <span class="skill-pill purple">OpenXR</span>
         <span class="skill-pill purple">Oculus SDK</span>
@@ -1305,19 +1397,19 @@ footer {
         <span class="skill-cat-title">Tools & Infrastructure</span>
       </div>
       <div class="skill-pills">
-        <span class="skill-pill amber">Git</span>
-        <span class="skill-pill amber">Docker</span>
-        <span class="skill-pill amber">Firebase</span>
-        <span class="skill-pill amber">Google Cloud</span>
-        <span class="skill-pill amber">MongoDB</span>
-        <span class="skill-pill amber">MySQL</span>
-        <span class="skill-pill amber">Linux</span>
-        <span class="skill-pill amber">Node.js</span>
-        <span class="skill-pill amber">Postman</span>
-        <span class="skill-pill amber">Figma</span>
-        <span class="skill-pill amber">Xcode</span>
-        <span class="skill-pill amber">Android Studio</span>
-        <span class="skill-pill amber">IntelliJ IDEA</span>
+        <span class="skill-pill amber"><i class="devicon-git-plain colored" aria-hidden="true"></i>Git</span>
+        <span class="skill-pill amber"><i class="devicon-docker-plain colored" aria-hidden="true"></i>Docker</span>
+        <span class="skill-pill amber"><i class="devicon-firebase-plain colored" aria-hidden="true"></i>Firebase</span>
+        <span class="skill-pill amber"><i class="devicon-googlecloud-plain colored" aria-hidden="true"></i>Google Cloud</span>
+        <span class="skill-pill amber"><i class="devicon-mongodb-plain colored" aria-hidden="true"></i>MongoDB</span>
+        <span class="skill-pill amber"><i class="devicon-mysql-original colored" aria-hidden="true"></i>MySQL</span>
+        <span class="skill-pill amber"><i class="devicon-linux-plain" aria-hidden="true"></i>Linux</span>
+        <span class="skill-pill amber"><i class="devicon-nodejs-plain colored" aria-hidden="true"></i>Node.js</span>
+        <span class="skill-pill amber"><i class="devicon-postman-plain colored" aria-hidden="true"></i>Postman</span>
+        <span class="skill-pill amber"><i class="devicon-figma-plain colored" aria-hidden="true"></i>Figma</span>
+        <span class="skill-pill amber"><i class="devicon-xcode-plain colored" aria-hidden="true"></i>Xcode</span>
+        <span class="skill-pill amber"><i class="devicon-androidstudio-plain colored" aria-hidden="true"></i>Android Studio</span>
+        <span class="skill-pill amber"><i class="devicon-intellij-plain colored" aria-hidden="true"></i>IntelliJ IDEA</span>
       </div>
     </div>
     <div class="skill-category" data-cat="ai">
@@ -1332,10 +1424,12 @@ footer {
       </div>
     </div>
   </div>
-</section>
+  </div>
+</div>
 
 <!-- EXPERIENCE -->
-<section id="experience">
+<div class="stage-panel" id="experience">
+  <div class="panel-inner">
   <div class="section-header reveal">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> work_experience.log</div>
     <h2 class="section-title">Experience</h2>
@@ -1372,10 +1466,12 @@ footer {
       </div>
     </div>
   </div>
-</section>
+  </div>
+</div>
 
 <!-- EDUCATION -->
-<section id="education">
+<div class="stage-panel" id="education">
+  <div class="panel-inner">
   <div class="section-header reveal">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> education.txt</div>
     <h2 class="section-title">Education</h2>
@@ -1398,10 +1494,12 @@ footer {
       <div class="edu-date">Jul 2017 — Nov 2020</div>
     </div>
   </div>
-</section>
+  </div>
+</div>
 
 <!-- PROJECTS -->
-<section id="projects">
+<div class="stage-panel" id="projects">
+  <div class="panel-inner">
   <div class="section-header reveal">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">ls</span> projects/</div>
     <h2 class="section-title">Projects</h2>
@@ -1415,10 +1513,12 @@ footer {
   <div class="projects-grid" id="projects-container">
     <!-- Project cards injected from projects.js -->
   </div>
-</section>
+  </div>
+</div>
 
 <!-- RESEARCH -->
-<section id="research">
+<div class="stage-panel" id="research">
+  <div class="panel-inner">
   <div class="section-header reveal">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">cat</span> research/*.md</div>
     <h2 class="section-title">Research</h2>
@@ -1443,10 +1543,12 @@ footer {
       </div>
     </div>
   </div>
-</section>
+  </div>
+</div>
 
 <!-- CONTACT -->
-<section id="contact">
+<div class="stage-panel" id="contact">
+  <div class="panel-inner">
   <div class="section-header reveal" style="text-align:center;">
     <div class="section-cmd"><span class="prompt">$</span> <span class="cmd">echo</span> $CONTACT_INFO</div>
     <h2 class="section-title">Let's Connect</h2>
@@ -1473,7 +1575,12 @@ footer {
       </a>
     </div>
   </div>
-</section>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1554,8 +1661,9 @@ window.addEventListener('scroll', () => {
 const themeToggle = document.getElementById('themeToggle');
 function syncThemeIcon() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  themeToggle.textContent = isLight ? '☀️' : '🌙';
-  themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+  themeToggle.textContent = '💡';
+  themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark theme (turn light off)' : 'Switch to light theme (turn light on)');
+  themeToggle.setAttribute('aria-pressed', String(isLight));
 }
 syncThemeIcon();
 themeToggle.addEventListener('click', () => {
@@ -1600,26 +1708,124 @@ projectChips.forEach(chip => {
   });
 });
 
-// Scroll reveal
-const revealEls = document.querySelectorAll('.reveal, .stagger');
+// Scroll reveal (elements outside the pinned stage — the stage reveals its own
+// content in sync with the per-panel typing effect).
+const revealEls = Array.from(document.querySelectorAll('.reveal, .stagger'))
+  .filter(el => !el.closest('#scrollStage'));
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }});
 }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 revealEls.forEach(el => observer.observe(el));
 
-// Active nav link highlight
-const sections = document.querySelectorAll('section[id]');
-const navAnchors = document.querySelectorAll('.nav-links a');
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      navAnchors.forEach(a => a.style.color = '');
-      const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
-      if (active) active.style.color = 'var(--green)';
+// ==================== SCROLL STAGE ====================
+// After the hero there is a single pinned "stage"; its panels swap as you scroll.
+(function scrollStage() {
+  const stage = document.getElementById('scrollStage');
+  if (!stage) return;
+  const panels = Array.from(stage.querySelectorAll('.stage-panel'));
+  const navAnchors = document.querySelectorAll('.nav-links a');
+  const hashLinks = document.querySelectorAll('a[href^="#"]');
+  const n = panels.length;
+  if (!n) return;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // One viewport of scroll per panel.
+  function sizeStage() { stage.style.height = (n * 100) + 'vh'; }
+  function range() { return Math.max(1, stage.offsetHeight - window.innerHeight); }
+
+  // --- Per-panel typing reveal: type the command, then stagger the content in ---
+  const typed = new Set();
+
+  function typeCmd(cmdEl, done) {
+    const text = cmdEl.dataset.plain || '';
+    const full = cmdEl.dataset.full || '';
+    const caret = document.createElement('span');
+    caret.className = 'type-caret';
+    let i = 0;
+    cmdEl.textContent = '';
+    cmdEl.appendChild(caret);
+    (function tick() {
+      cmdEl.textContent = text.slice(0, ++i);
+      cmdEl.appendChild(caret);
+      if (i < text.length) setTimeout(tick, 28);
+      else setTimeout(() => { cmdEl.innerHTML = full; done(); }, 180);
+    })();
+  }
+
+  // Drop the hold on title + content and let .reveal/.stagger items fade in
+  // one after another (per-item delays are already defined in CSS).
+  function revealContent(panel) {
+    panel.classList.remove('awaiting-type');
+    panel.querySelectorAll('.reveal, .stagger').forEach(el => el.classList.add('visible'));
+  }
+
+  function animatePanel(i) {
+    const panel = panels[i];
+    if (typed.has(i)) { revealContent(panel); return; }
+    typed.add(i);
+    const cmdEl = panel.querySelector('.section-cmd');
+    if (!cmdEl || !cmdEl.dataset.plain) { revealContent(panel); return; }
+    typeCmd(cmdEl, () => revealContent(panel));
+  }
+
+  let current = -1;
+  function setActive(i, inStage) {
+    if (i !== current) {
+      current = i;
+      panels.forEach((p, idx) => p.classList.toggle('active', idx === i));
+      const id = panels[i].id;
+      navAnchors.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + id ? 'var(--green)' : '';
+      });
     }
+    // Only start typing once the stage is actually on screen — never on the hero.
+    if (inStage && !reduce) animatePanel(i);
+  }
+
+  function onScroll() {
+    const p = (window.scrollY - stage.offsetTop) / range();
+    const inStage = p >= -0.05 && p <= 1.05;
+    const clamped = Math.max(0, Math.min(0.99999, p));
+    setActive(Math.min(n - 1, Math.floor(clamped * n)), inStage);
+  }
+
+  function goTo(i) {
+    const target = stage.offsetTop + ((i + 0.5) / n) * range();
+    window.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  // Intercept in-page links (top nav + hero buttons) that target a panel.
+  hashLinks.forEach(a => {
+    const href = a.getAttribute('href');
+    if (!href || href.charAt(0) !== '#') return;
+    const idx = panels.findIndex(p => p.id === href.slice(1));
+    if (idx >= 0) a.addEventListener('click', (e) => { e.preventDefault(); goTo(idx); });
   });
-}, { threshold: 0.3 });
-sections.forEach(s => sectionObserver.observe(s));
+
+  // Prime the reveal. Under reduced motion, just show everything. Otherwise stash
+  // + blank each command, reveal the header (so the command line is visible to
+  // type into), and hold the title/content until each panel is typed.
+  if (reduce) {
+    stage.querySelectorAll('.reveal, .stagger').forEach(el => el.classList.add('visible'));
+  } else {
+    stage.querySelectorAll('.section-header').forEach(h => h.classList.add('visible'));
+    panels.forEach(p => {
+      const cmdEl = p.querySelector('.section-cmd');
+      if (cmdEl) {
+        cmdEl.dataset.full = cmdEl.innerHTML;
+        cmdEl.dataset.plain = cmdEl.textContent;
+        cmdEl.textContent = '';
+      }
+      p.classList.add('awaiting-type');
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => { sizeStage(); onScroll(); });
+  sizeStage();
+  onScroll();
+})();
 
 // ==================== PROJECTS (from projects.js) ====================
 const PROJECT_ICONS = ['🎨', '🚀', '🛒', '🌐', '📸', '💻', '📋', '💧'];
