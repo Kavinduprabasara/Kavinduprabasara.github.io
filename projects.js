@@ -26,17 +26,6 @@ const projectsData = [
     ]
   },
   {
-    "title": "Best Body Japan iOS",
-    "subtitle": "4Axis · iOS App",
-    "category": "4axis",
-    "description": "An iOS application for the Best Body Japan fitness community, built with Swift and SwiftUI. I contributed to native screen implementation and a clean, responsive interface.",
-    "details": "Best Body Japan is an iOS app developed at 4Axis using Swift and SwiftUI. I worked on implementing native UI screens and app functionality, focusing on a polished, responsive interface and a maintainable SwiftUI view architecture.",
-    "technologies": "Swift, SwiftUI",
-    "images": [
-      "./BBJ2.png"
-    ]
-  },
-  {
     "title": "Microservices E-Commerce Platform",
     "subtitle": "Aug 2024 - Dec 2024",
     "category": "academic",

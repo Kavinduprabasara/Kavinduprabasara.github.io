@@ -217,15 +217,16 @@ nav.scrolled { border-bottom-color: var(--border); }
   width: 32px;
   height: 32px;
   background: none;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 8px;
   color: var(--text-muted);
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1;
+  transform: rotate(180deg);
   transition: all 0.2s, filter 0.3s ease, text-shadow 0.3s ease;
 }
-.theme-toggle:hover { color: var(--green); border-color: var(--green); background: rgba(74, 222, 128, 0.06); }
+.theme-toggle:hover { color: var(--green); background: rgba(74, 222, 128, 0.06); }
 /* Bulb OFF — dark mode (default): dim, desaturated */
 .theme-toggle { filter: grayscale(1) brightness(0.75) opacity(0.6); }
 /* Bulb ON — light mode: full colour with a warm glow */
@@ -1505,7 +1506,8 @@ footer {
     <h2 class="section-title">Projects</h2>
   </div>
   <div class="skill-chips reveal" id="projectChips">
-    <button class="skill-chip active" data-cat="4axis"><span>🏢</span> 4Axis</button>
+    <button class="skill-chip active" data-cat="all"><span>🗂️</span> All</button>
+    <button class="skill-chip" data-cat="4axis"><span>🏢</span> 4Axis</button>
     <button class="skill-chip" data-cat="academic"><span>🎓</span> Academic</button>
     <button class="skill-chip" data-cat="volunteering"><span>🤝</span> Volunteering</button>
     <button class="skill-chip" data-cat="freelance"><span>💼</span> Freelance</button>
@@ -1698,7 +1700,7 @@ skillChips.forEach(chip => {
 const projectChips = document.querySelectorAll('#projectChips .skill-chip');
 function filterProjects(cat) {
   document.querySelectorAll('#projects-container .project-card').forEach(card => {
-    card.style.display = card.dataset.cat === cat ? '' : 'none';
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
   });
 }
 projectChips.forEach(chip => {
