@@ -37,6 +37,19 @@ const projectsData = [
     ]
   },
   {
+    "title": "Sri Lanka Cricket — Data-Driven Player Selection System",
+    "subtitle": "Machine Learning Assignment",
+    "category": "academic",
+    "description": "An end-to-end Machine Learning pipeline and interactive Streamlit dashboard that helps cricket selectors objectively evaluate players on their recent T20 form (last 10 matches) rather than career reputation. Random Forest classifiers assign a dynamic form label (Poor, Average, Good, Excellent) to every active Sri Lankan player and recommend the optimal Playing XI mapped to specific team roles.",
+    "details": "The system is built on ball-by-ball international cricket data from Cricsheet (T20 Internationals and the Lanka Premier League). Raw records are parsed into per-match player statistics and aggregated into rolling EWMA form features — batting strike rates, dot-ball percentages, bowling economy, and more. Random Forest classifiers were chosen for their ability to capture non-linear form relationships and their clean mapping to SHAP explainers; SMOTE and class-weight balancing handle the rarity of Excellent performances. Selectors can generate the mathematically strongest XI against a specific opponent at a specific venue, and every recommendation is backed by transparent SHAP waterfall charts that explain exactly why a player was rated highly or poorly, removing the algorithmic black box.",
+    "technologies": "Python, Scikit-Learn, Random Forest, SHAP, SMOTE, Streamlit, Plotly, Pandas",
+    "link": "https://sri-lanka-cricket-data-driven-player-selection-system-fappvxlh.streamlit.app/",
+    "linkText": "Visit Live App",
+    "images": [
+      "./slcricketrecomender.png"
+    ]
+  },
+  {
     "title": "Anothershot",
     "subtitle": "Second Year Software Project",
     "category": "academic",
