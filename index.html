@@ -60,10 +60,10 @@
   --scanline: rgba(0, 0, 0, 0.015);
 }
 
-html { scroll-behavior: smooth; overflow-x: clip; }
+html { scroll-behavior: smooth; overflow-x: clip; background: var(--bg-deep); }
 
 body {
-  background: var(--bg-deep);
+  background: transparent;   /* bg lives on <html> so the fixed matrix canvas shows through */
   color: var(--text);
   font-family: var(--font-body);
   line-height: 1.7;
@@ -277,6 +277,20 @@ nav.scrolled { border-bottom-color: var(--border); }
     linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse 70% 50% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* Full-page Matrix rain, fixed behind all content */
+.bg-matrix {
+  position: fixed;
+  inset: 0;
+  z-index: -1;               /* above body bg, below page content */
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.4;
+  pointer-events: none;
+  /* Vignette: brighter toward center-top, dimmer at the edges */
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 30%, black 35%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 30%, black 35%, transparent 95%);
 }
 
 .hero-glow {
@@ -1218,6 +1232,9 @@ footer {
 </head>
 <body class="loading">
 
+<!-- MATRIX RAIN BACKGROUND -->
+<canvas class="bg-matrix" id="bgMatrix"></canvas>
+
 <!-- LOADER -->
 <div id="loader">
   <div class="loader-window">
@@ -1986,7 +2003,87 @@ function startHero() {
   })();
 }
 
-document.addEventListener('DOMContentLoaded', loadProjects);
+// ==================== MATRIX DIGITAL RAIN ====================
+function startMatrix() {
+  const canvas = document.getElementById('bgMatrix');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const glyphs = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789<>[]{}/\\=+*ｱｶｻﾀﾅﾊﾏﾔﾗﾜﾝ'.split('');
+  const fontSize = 16;
+  let columns = 0;
+  let drops = [];      // y-position (in rows) of the leading glyph per column
+  let width = 0, height = 0;
+
+  // Pull the theme's green so the rain matches light/dark mode.
+  function rainColor() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--green').trim() || '#4ade80';
+  }
+  let head = rainColor();
+  const trailFade = () =>
+    (document.documentElement.getAttribute('data-theme') === 'light')
+      ? 'rgba(255, 255, 255, 0.10)'   // light bg → fade to white
+      : 'rgba(6, 9, 15, 0.10)';       // dark bg  → fade to deep bg
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    columns = Math.ceil(width / fontSize);
+    drops = new Array(columns).fill(0).map(() => Math.random() * -50);
+  }
+
+  function draw() {
+    // Translucent overlay each frame leaves fading trails behind the heads.
+    ctx.fillStyle = trailFade();
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = fontSize + 'px ' + "'JetBrains Mono', monospace";
+
+    for (let i = 0; i < columns; i++) {
+      const ch = glyphs[(Math.random() * glyphs.length) | 0];
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
+      // Brighter leading glyph, dimmer body for depth.
+      ctx.fillStyle = Math.random() > 0.975 ? '#ffffff' : head;
+      ctx.fillText(ch, x, y);
+
+      if (y > height && Math.random() > 0.975) drops[i] = Math.random() * -20;
+      drops[i]++;
+    }
+  }
+
+  let raf = null;
+  let last = 0;
+  const frameMs = 55;                 // ~18fps: classic slow Matrix cadence
+  function loop(ts) {
+    raf = requestAnimationFrame(loop);
+    if (ts - last < frameMs) return;
+    last = ts;
+    draw();
+  }
+  function play() { if (!raf) { last = 0; raf = requestAnimationFrame(loop); } }
+  function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  // React to theme toggles.
+  new MutationObserver(() => { head = rainColor(); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Run across the whole page; pause only when the tab is backgrounded.
+  play();
+  document.addEventListener('visibilitychange', () => {
+    document.hidden ? stop() : play();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadProjects(); startMatrix(); });
 </script>
 
 </body>
